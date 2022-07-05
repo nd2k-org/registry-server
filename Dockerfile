@@ -1,0 +1,11 @@
+FROM maven:3.8-openjdk-18-slim AS build
+RUN mkdir -p /workspace-registry
+WORKDIR /workspace-registry
+COPY pom.xml /workspace-registry
+COPY src /workspace-registry/src
+RUN mvn -B -f pom.xml clean package -DskipTests
+
+FROM openjdk:18-jdk-slim
+COPY --from=build /workspace-registry/target/*.jar registry-server.jar
+EXPOSE 8761
+ENTRYPOINT ["java","-jar","registry-server.jar"]
